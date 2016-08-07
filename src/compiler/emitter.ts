@@ -4643,6 +4643,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
                     // Emit name if one is present, or emit generated name in down-level case (for export default case)
                     return !!node.name || modulekind !== ModuleKind.ES6;
                 }
+                if (node.kind === SyntaxKind.MethodDeclaration) {
+                    // Emit name if one is present
+                    return !!node.name;
+                }
             }
 
             function emitFunctionDeclaration(node: FunctionLikeDeclaration) {

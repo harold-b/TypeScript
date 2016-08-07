@@ -39,6 +39,8 @@ const gulp = helpMaker(originalGulp);
 const mochaParallel = require("./scripts/mocha-parallel.js");
 const {runTestsInParallel} = mochaParallel;
 
+const useBuiltCompiler = false
+
 const cmdLineOptions = minimist(process.argv.slice(2), {
     boolean: ["debug", "light", "colors", "lint", "soft"],
     string: ["browser", "tests", "host", "reporter"],
@@ -436,13 +438,17 @@ function prependCopyright(outputCopyright: boolean = !useDebugMode) {
 }
 
 gulp.task(builtLocalCompiler, false, [servicesFile], () => {
-    const localCompilerProject = tsc.createProject("src/compiler/tsconfig.json", getCompilerSettings({}, /*useBuiltCompiler*/true));
+    const localCompilerProject = tsc.createProject("src/compiler/tsconfig.json", getCompilerSettings({}, /*useBuiltCompiler*/useBuiltCompiler));
     return localCompilerProject.src()
         .pipe(newer(builtLocalCompiler))
         .pipe(sourcemaps.init())
         .pipe(tsc(localCompilerProject))
         .pipe(prependCopyright())
-        .pipe(sourcemaps.write("."))
+        //.pipe(sourcemaps.write("."))
+        .pipe( sourcemaps.write( ".", {
+            includeContent: false, 
+            sourceRoot: "../../src/compiler"
+        } ))
         .pipe(gulp.dest(builtLocalDirectory));
 });
 
@@ -1043,6 +1049,11 @@ gulp.task("lint", "Runs tslint on the compiler sources. Optional arguments are: 
 
 gulp.task("default", "Runs 'local'", ["local"]);
 
+//gulp.task("watch", "Watches the src/ directory for changes and executes runtests-parallel.", [], () => {
+//    gulp.watch("src/**/*.*", ["runtests-parallel"]);
+//});
+
+// Watch and re-compile
 gulp.task("watch", "Watches the src/ directory for changes and executes runtests-parallel.", [], () => {
-    gulp.watch("src/**/*.*", ["runtests-parallel"]);
+    gulp.watch("src/**/*.*", ["local"]);//] [builtLocalCompiler]);
 });

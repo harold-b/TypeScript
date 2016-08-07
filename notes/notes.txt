@@ -1,0 +1,8 @@
+In order to get the method bodies to emit the function name, we must change 
+"function shouldEmitFunctionName(node: FunctionLikeDeclaration)"
+to have:
+
+if (node.kind === SyntaxKind.MethodDeclaration) {
+    // Emit name if one is present
+    return !!node.name;
+}
